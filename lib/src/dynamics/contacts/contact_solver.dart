@@ -67,104 +67,110 @@ class ContactSolver {
 
   void init(ContactSolverDef def) {
     // System.out.println("Initializing contact solver");
-    _step = def.step;
-    _count = def.count;
+    print('initializing contact solver');
+    try {
+      _step = def.step;
+      _count = def.count;
 
-    if (_positionConstraints.length < _count) {
-      List<ContactPositionConstraint> old = _positionConstraints;
-      _positionConstraints =
-          List<ContactPositionConstraint>(Math.max(old.length * 2, _count));
-      BufferUtils.arraycopy(old, 0, _positionConstraints, 0, old.length);
-      for (int i = old.length; i < _positionConstraints.length; i++) {
-        _positionConstraints[i] = ContactPositionConstraint();
-      }
-    }
-
-    if (_velocityConstraints.length < _count) {
-      List<ContactVelocityConstraint> old = _velocityConstraints;
-      _velocityConstraints =
-          List<ContactVelocityConstraint>(Math.max(old.length * 2, _count));
-      BufferUtils.arraycopy(old, 0, _velocityConstraints, 0, old.length);
-      for (int i = old.length; i < _velocityConstraints.length; i++) {
-        _velocityConstraints[i] = ContactVelocityConstraint();
-      }
-    }
-
-    _positions = def.positions;
-    _velocities = def.velocities;
-    _contacts = def.contacts;
-
-    for (int i = 0; i < _count; ++i) {
-      // System.out.println("contacts: " + _count);
-      final Contact contact = _contacts[i];
-
-      final Fixture fixtureA = contact._fixtureA;
-      final Fixture fixtureB = contact._fixtureB;
-      final Shape shapeA = fixtureA.getShape();
-      final Shape shapeB = fixtureB.getShape();
-      final double radiusA = shapeA.radius;
-      final double radiusB = shapeB.radius;
-      final Body bodyA = fixtureA.getBody();
-      final Body bodyB = fixtureB.getBody();
-      final Manifold manifold = contact._manifold;
-
-      int pointCount = manifold.pointCount;
-      assert(pointCount > 0);
-
-      ContactVelocityConstraint vc = _velocityConstraints[i];
-      vc.friction = contact._friction;
-      vc.restitution = contact._restitution;
-      vc.tangentSpeed = contact._tangentSpeed;
-      vc.indexA = bodyA._islandIndex;
-      vc.indexB = bodyB._islandIndex;
-      vc.invMassA = bodyA._invMass;
-      vc.invMassB = bodyB._invMass;
-      vc.invIA = bodyA._invI;
-      vc.invIB = bodyB._invI;
-      vc.contactIndex = i;
-      vc.pointCount = pointCount;
-      vc.K.setZero();
-      vc.normalMass.setZero();
-
-      ContactPositionConstraint pc = _positionConstraints[i];
-      pc.indexA = bodyA._islandIndex;
-      pc.indexB = bodyB._islandIndex;
-      pc.invMassA = bodyA._invMass;
-      pc.invMassB = bodyB._invMass;
-      pc.localCenterA.setFrom(bodyA._sweep.localCenter);
-      pc.localCenterB.setFrom(bodyB._sweep.localCenter);
-      pc.invIA = bodyA._invI;
-      pc.invIB = bodyB._invI;
-      pc.localNormal.setFrom(manifold.localNormal);
-      pc.localPoint.setFrom(manifold.localPoint);
-      pc.pointCount = pointCount;
-      pc.radiusA = radiusA;
-      pc.radiusB = radiusB;
-      pc.type = manifold.type;
-
-      // System.out.println("contact point count: " + pointCount);
-      for (int j = 0; j < pointCount; j++) {
-        ManifoldPoint cp = manifold.points[j];
-        VelocityConstraintPoint vcp = vc.points[j];
-
-        if (_step.warmStarting) {
-          // assert(cp.normalImpulse == 0);
-          // System.out.println("contact normal impulse: " + cp.normalImpulse);
-          vcp.normalImpulse = _step.dtRatio * cp.normalImpulse;
-          vcp.tangentImpulse = _step.dtRatio * cp.tangentImpulse;
-        } else {
-          vcp.normalImpulse = 0.0;
-          vcp.tangentImpulse = 0.0;
+      if (_positionConstraints.length < _count) {
+        List<ContactPositionConstraint> old = _positionConstraints;
+        _positionConstraints =
+            List<ContactPositionConstraint>(Math.max(old.length * 2, _count));
+        BufferUtils.arraycopy(old, 0, _positionConstraints, 0, old.length);
+        for (int i = old.length; i < _positionConstraints.length; i++) {
+          _positionConstraints[i] = ContactPositionConstraint();
         }
-
-        vcp.rA.setZero();
-        vcp.rB.setZero();
-        vcp.normalMass = 0.0;
-        vcp.tangentMass = 0.0;
-        vcp.velocityBias = 0.0;
-        pc.localPoints[j].x = cp.localPoint.x;
-        pc.localPoints[j].y = cp.localPoint.y;
       }
+
+      if (_velocityConstraints.length < _count) {
+        List<ContactVelocityConstraint> old = _velocityConstraints;
+        _velocityConstraints =
+            List<ContactVelocityConstraint>(Math.max(old.length * 2, _count));
+        BufferUtils.arraycopy(old, 0, _velocityConstraints, 0, old.length);
+        for (int i = old.length; i < _velocityConstraints.length; i++) {
+          _velocityConstraints[i] = ContactVelocityConstraint();
+        }
+      }
+
+      _positions = def.positions;
+      _velocities = def.velocities;
+      _contacts = def.contacts;
+
+      for (int i = 0; i < _count; ++i) {
+        // System.out.println("contacts: " + _count);
+        final Contact contact = _contacts[i];
+
+        final Fixture fixtureA = contact._fixtureA;
+        final Fixture fixtureB = contact._fixtureB;
+        final Shape shapeA = fixtureA.getShape();
+        final Shape shapeB = fixtureB.getShape();
+        final double radiusA = shapeA.radius;
+        final double radiusB = shapeB.radius;
+        final Body bodyA = fixtureA.getBody();
+        final Body bodyB = fixtureB.getBody();
+        final Manifold manifold = contact._manifold;
+
+        int pointCount = manifold.pointCount;
+        assert(pointCount > 0);
+
+        ContactVelocityConstraint vc = _velocityConstraints[i];
+        vc.friction = contact._friction;
+        vc.restitution = contact._restitution;
+        vc.tangentSpeed = contact._tangentSpeed;
+        vc.indexA = bodyA._islandIndex;
+        vc.indexB = bodyB._islandIndex;
+        vc.invMassA = bodyA._invMass;
+        vc.invMassB = bodyB._invMass;
+        vc.invIA = bodyA._invI;
+        vc.invIB = bodyB._invI;
+        vc.contactIndex = i;
+        vc.pointCount = pointCount;
+        vc.K.setZero();
+        vc.normalMass.setZero();
+
+        ContactPositionConstraint pc = _positionConstraints[i];
+        pc.indexA = bodyA._islandIndex;
+        pc.indexB = bodyB._islandIndex;
+        pc.invMassA = bodyA._invMass;
+        pc.invMassB = bodyB._invMass;
+        pc.localCenterA.setFrom(bodyA._sweep.localCenter);
+        pc.localCenterB.setFrom(bodyB._sweep.localCenter);
+        pc.invIA = bodyA._invI;
+        pc.invIB = bodyB._invI;
+        pc.localNormal.setFrom(manifold.localNormal);
+        pc.localPoint.setFrom(manifold.localPoint);
+        pc.pointCount = pointCount;
+        pc.radiusA = radiusA;
+        pc.radiusB = radiusB;
+        pc.type = manifold.type;
+
+        // System.out.println("contact point count: " + pointCount);
+        for (int j = 0; j < pointCount; j++) {
+          ManifoldPoint cp = manifold.points[j];
+          VelocityConstraintPoint vcp = vc.points[j];
+
+          if (_step.warmStarting) {
+            // assert(cp.normalImpulse == 0);
+            // System.out.println("contact normal impulse: " + cp.normalImpulse);
+            vcp.normalImpulse = _step.dtRatio * cp.normalImpulse;
+            vcp.tangentImpulse = _step.dtRatio * cp.tangentImpulse;
+          } else {
+            vcp.normalImpulse = 0.0;
+            vcp.tangentImpulse = 0.0;
+          }
+
+          vcp.rA.setZero();
+          vcp.rB.setZero();
+          vcp.normalMass = 0.0;
+          vcp.tangentMass = 0.0;
+          vcp.velocityBias = 0.0;
+          pc.localPoints[j].x = cp.localPoint.x;
+          pc.localPoints[j].y = cp.localPoint.y;
+        }
+      }
+    } catch (e) {
+      print('deu ruim bubblessss ${e.toString}');
+      rethrow;
     }
   }
 
