@@ -67,7 +67,6 @@ class ContactSolver {
 
   void init(ContactSolverDef def) {
     // System.out.println("Initializing contact solver");
-    print('initializing contact solver');
     try {
       _step = def.step;
       _count = def.count;
@@ -169,7 +168,7 @@ class ContactSolver {
         }
       }
     } catch (e) {
-      print('deu ruim bubblessss ${e.toString}');
+      print('Error: ${e.toString}');
       rethrow;
     }
   }
